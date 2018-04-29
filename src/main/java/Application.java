@@ -1,9 +1,15 @@
 public class Application {
+    public Simulator simulator;
+    private Application() {
+        System.out.print(simulator.getClock());
+    }
 
-    public Application() {
+    private void run(){
+        simulator.simulate();
     }
 
     public static void main(String[] args){
-        System.out.print("HOLA");
+        Application application = new Application();
+        application.run();
     }
 }
