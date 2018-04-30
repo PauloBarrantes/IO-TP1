@@ -4,7 +4,6 @@
 
  */
 
-import javax.swing.*;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -97,21 +96,21 @@ public class Simulator {
            }
            //Move the clock
 
-           setClock(actualEvent.getTime() + clock);
+           setClock(actualEvent.getTime());
             //Preguntar como se mueve el reloj;
 
            System.out.println("Clock: " + clock );
            System.out.println("QueueLength: " +queueLength);
-           System.out.println("ClientsServed" + clientsServed);
-           System.out.println("Busy" + busy);
+           System.out.println("ClientsServed: " + clientsServed);
+           System.out.println("Busy: " + busy);
         }
 
 
     }
     public void processArrive(){
-        if(getClientsServed()< servers){
+        if(busy < servers){
             busy++;
-            clientsServed++;
+            ++clientsServed;
             generateDeparture();
         }else{
             queueLength++;
@@ -124,7 +123,7 @@ public class Simulator {
             ++ clientsServed;
             generateDeparture();
         }else{
-            --busy;
+                --busy;
         }
     }
 
@@ -139,11 +138,13 @@ public class Simulator {
             fGrande += d.get(counter).probability ;
             if(randomNumber < fGrande){
                 found = true;
+            }else{
+                ++counter;
             }
-            ++counter;
+
         }
 
-        Event depart = new Event(d.get(counter).time, 1); //1 --> Depart
+        Event depart = new Event(d.get(counter).time+this.clock, 1); //1 --> Depart
 
         tableOfEvents.add(depart);
     }
@@ -156,11 +157,14 @@ public class Simulator {
             fGrande += a.get(counter).probability ;
             if(randomNumber < fGrande){
                 found = true;
+            }else{
+                ++counter;
             }
-            ++counter;
+
         }
 
-        Event depart = new Event(a.get(counter).time, 1); //1 --> Depart
+
+        Event depart = new Event(a.get(counter).time + this.clock, 0); //1 --> Depart
 
         tableOfEvents.add(depart);
 

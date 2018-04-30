@@ -9,4 +9,16 @@
     <version>1.0-SNAPSHOT</version>
 
 
+    <dependencies>
+
+    <!-- https://mvnrepository.com/artifact/org.webjars/chartjs -->
+    <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>chartjs</artifactId>
+        <version>26962ce-1</version>
+    </dependency>
+</dependencies>
+
+
+
 </project>
