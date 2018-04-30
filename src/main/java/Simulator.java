@@ -3,10 +3,12 @@
 
 
  */
+
+import javax.swing.*;
 import java.util.Comparator;
 import java.util.PriorityQueue;
-
-
+import java.util.Random;
+import java.util.ArrayList;
 public class Simulator {
     // Simulation variables
     private int clock;
@@ -20,25 +22,33 @@ public class Simulator {
     //State variables
     private int busy;
     private int queueLength;
-    private int servers;
-
+    private static final int servers = 2;
     //statistical variables
     private int clientsServed;
+
+    //Other variables
+    public Random rnd = new Random(System.currentTimeMillis());
+    double randomNumber;
+    public ArrayList<Distribution> a;
+    public ArrayList<Distribution> d;
+
+
     //Constructor
-    public Simulator() {
+    public Simulator(ArrayList<Distribution> a, ArrayList<Distribution> d) {
+        this.a = a;
+        this.d = d;
         this.setClock(0);
         this.setBusy(0);
         this.setQueueLength(0);
         this.setClientsServed(0);
-        this.setServers(2);
     }
 
     //Getter and Setter
-    int getClock() {
+    public int getClock() {
         return clock;
     }
 
-    private void setClock(int clock) {
+    public void setClock(int clock) {
         this.clock = clock;
     }
 
@@ -48,12 +58,6 @@ public class Simulator {
 
     public void setBusy(int busy) {
         this.busy = busy;
-    }
-    public void incrementBusy(){
-        this.busy++;
-    }
-    public void decrementBusy(){
-        this.busy--;
     }
 
     public int getQueueLength() {
@@ -72,13 +76,7 @@ public class Simulator {
         this.clientsServed = clientsServed;
     }
 
-    public int getServers() {
-        return servers;
-    }
 
-    public void setServers(int servers) {
-        this.servers = servers;
-    }
     //Simulating process
 
     public void simulate(){
@@ -86,7 +84,7 @@ public class Simulator {
         Event initialArrive = new Event(0,0);
         tableOfEvents.add(initialArrive);
         Event actualEvent;
-        while(getClientsServed() > 15){
+        while(getClientsServed() < 15){
             //Get next event
            actualEvent =  tableOfEvents.poll();
 
@@ -99,12 +97,19 @@ public class Simulator {
            }
            //Move the clock
 
-           setClock(3);
+           setClock(actualEvent.getTime() + clock);
+            //Preguntar como se mueve el reloj;
+
+           System.out.println("Clock: " + clock );
+           System.out.println("QueueLength: " +queueLength);
+           System.out.println("ClientsServed" + clientsServed);
+           System.out.println("Busy" + busy);
         }
+
 
     }
     public void processArrive(){
-        if(getClientsServed()< getServers()){
+        if(getClientsServed()< servers){
             busy++;
             clientsServed++;
             generateDeparture();
@@ -124,9 +129,40 @@ public class Simulator {
     }
 
     public void generateDeparture(){
+        randomNumber = rnd.nextDouble();
 
+        int size = d.size();
+        int counter = 0;
+        double fGrande = 0.0;
+        boolean found = false;
+        while (counter < size && !found){
+            fGrande += d.get(counter).probability ;
+            if(randomNumber < fGrande){
+                found = true;
+            }
+            ++counter;
+        }
+
+        Event depart = new Event(d.get(counter).time, 1); //1 --> Depart
+
+        tableOfEvents.add(depart);
     }
     public void generateArrival(){
+        int size = a.size();
+        int counter = 0;
+        double fGrande = 0.0;
+        boolean found = false;
+        while (counter < size && !found){
+            fGrande += a.get(counter).probability ;
+            if(randomNumber < fGrande){
+                found = true;
+            }
+            ++counter;
+        }
+
+        Event depart = new Event(a.get(counter).time, 1); //1 --> Depart
+
+        tableOfEvents.add(depart);
 
     }
 
