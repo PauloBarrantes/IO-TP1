@@ -13,7 +13,24 @@ public class Simulator {
     private int clock;
     private Comparator<Event> comparator = new Comparator<Event>() {
         public int compare(Event o1, Event o2) {
-            return o1.getTime()-o2.getTime();
+            int cmp = 0;
+            if(o1.getType()!= o2.getType() && o1.getTime() == o2.getTime()){
+                System.out.println("o1 Time: " + o1.getTime() + " Type: " + o1.getType());
+                System.out.println("o2 Time: " + o2.getTime() + " Type: " + o2.getType());
+
+                if(o1.getType() == 1){
+                    cmp = -1;
+                }else{ // o2 type-> 1 depart
+                    cmp = 1;
+                }
+
+            }else{
+                return o1.getTime()-o2.getTime();
+
+            }
+
+            return cmp;
+
         }
     };
     private PriorityQueue<Event> tableOfEvents = new PriorityQueue<Event>(100,comparator);
@@ -83,7 +100,7 @@ public class Simulator {
         Event initialArrive = new Event(0,0);
         tableOfEvents.add(initialArrive);
         Event actualEvent;
-        while(getClientsServed() < 15){
+        while(getClientsServed() < 5000){
             //Get next event
            actualEvent =  tableOfEvents.poll();
 
