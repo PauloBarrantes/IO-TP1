@@ -1,6 +1,6 @@
 public class Event {
-    int time;
-    int type;
+    private int time;
+    private int type;
     /*
         0 -> ARRIVE
         1 -> DEPART

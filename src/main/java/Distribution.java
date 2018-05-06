@@ -1,8 +1,9 @@
 public class Distribution {
 
-    public int time;
-    public double probability;
-    public Distribution(int time, double probability) {
+    private int time;
+    private double probability;
+
+    Distribution(int time, double probability) {
         this.time = time;
         this.probability = probability;
     }

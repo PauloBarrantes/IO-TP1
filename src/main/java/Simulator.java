@@ -4,20 +4,19 @@
 
  */
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.ArrayList;
-public class Simulator {
-    // Simulation variables
+
+
+class Simulator {
+    /* Simulation variables */
     private int clock;
     private Comparator<Event> comparator = new Comparator<Event>() {
         public int compare(Event o1, Event o2) {
             int cmp = 0;
             if(o1.getType()!= o2.getType() && o1.getTime() == o2.getTime()){
-                System.out.println("o1 Time: " + o1.getTime() + " Type: " + o1.getType());
-                System.out.println("o2 Time: " + o2.getTime() + " Type: " + o2.getType());
-
                 if(o1.getType() == 1){
                     cmp = -1;
                 }else{ // o2 type-> 1 depart
@@ -39,92 +38,78 @@ public class Simulator {
     private int busy;
     private int queueLength;
     private static final int servers = 2;
-    //statistical variables
+    //Statistical variables
     private int clientsServed;
 
+
+
     //Other variables
-    public Random rnd = new Random(System.currentTimeMillis());
-    double randomNumber;
-    public ArrayList<Distribution> a;
-    public ArrayList<Distribution> d;
+    private Random rnd = new Random(System.currentTimeMillis());
+    private ArrayList<Distribution> a;
+    private ArrayList<Distribution> d;
 
+    private enum Distribution2{
+        A (1,0.40),
+        B (2,0.35),
+        C (3,0.25);
 
+        private final int time;
+        private final double probability;
+        Distribution2(int time, double probability){
+            this.time = time;
+            this.probability = probability;
+        }
+
+        public int getTime() {
+            return time;
+        }
+
+        public double getProbability() {
+            return probability;
+        }
+    }
     //Constructor
-    public Simulator(ArrayList<Distribution> a, ArrayList<Distribution> d) {
+    Simulator(ArrayList<Distribution> a, ArrayList<Distribution> d) {
         this.a = a;
         this.d = d;
-        this.setClock(0);
-        this.setBusy(0);
-        this.setQueueLength(0);
-        this.setClientsServed(0);
+        this.clock = 0;
+        this.busy = 0;
+
+        this.queueLength =0;
+        this.clientsServed =0;
+
     }
 
-    //Getter and Setter
-    public int getClock() {
-        return clock;
-    }
-
-    public void setClock(int clock) {
-        this.clock = clock;
-    }
-
-    public int getBusy() {
-        return busy;
-    }
-
-    public void setBusy(int busy) {
-        this.busy = busy;
-    }
-
-    public int getQueueLength() {
-        return queueLength;
-    }
-
-    public void setQueueLength(int queueLength) {
-        this.queueLength = queueLength;
-    }
-
-    public int getClientsServed() {
-        return clientsServed;
-    }
-
-    public void setClientsServed(int clientsServed) {
-        this.clientsServed = clientsServed;
-    }
-
-
-    //Simulating process
-
-    public void simulate(){
-
+    void simulate(int id){
+        float timeAvg;
         Event initialArrive = new Event(0,0);
         tableOfEvents.add(initialArrive);
         Event actualEvent;
-        while(getClientsServed() < 5000){
+        while(clientsServed < 5000){
             //Get next event
-           actualEvent =  tableOfEvents.poll();
+            actualEvent =  tableOfEvents.poll();
 
-           //Process that event
+            //Process that event
             assert actualEvent != null;
             if(actualEvent.getType()==0){
-               this.processArrive();
-           }else{
+                this.processArrive();
+            }else{
                this.processDepart();
-           }
-           //Move the clock
+            }
+             //Move the clock
 
-           setClock(actualEvent.getTime());
-            //Preguntar como se mueve el reloj;
+            assert tableOfEvents.peek() != null;
+            clock = tableOfEvents.peek().getTime();
 
-           System.out.println("Clock: " + clock );
-           System.out.println("QueueLength: " +queueLength);
-           System.out.println("ClientsServed: " + clientsServed);
-           System.out.println("Busy: " + busy);
         }
+
+        timeAvg = (float)clock/clientsServed;
+        System.out.printf("%-20s%-20s%-20s%-20s%-20s-\n",id,clock,queueLength,clientsServed,timeAvg);
+
 
 
     }
-    public void processArrive(){
+    private void processArrive(){
         if(busy < servers){
             busy++;
             ++clientsServed;
@@ -134,7 +119,7 @@ public class Simulator {
         }
         generateArrival();
     }
-    public void processDepart(){
+    private void processDepart(){
         if(queueLength > 0 ){
             -- queueLength;
             ++ clientsServed;
@@ -144,47 +129,32 @@ public class Simulator {
         }
     }
 
-    public void generateDeparture(){
-        randomNumber = rnd.nextDouble();
-
-        int size = d.size();
-        int counter = 0;
-        double fGrande = 0.0;
-        boolean found = false;
-        while (counter < size && !found){
-            fGrande += d.get(counter).probability ;
-            if(randomNumber < fGrande){
-                found = true;
-            }else{
-                ++counter;
-            }
-
-        }
-
-        Event depart = new Event(d.get(counter).time+this.clock, 1); //1 --> Depart
-
+    private void generateDeparture(){
+        int i = fGrand(d);
+        Event depart = new Event(d.get(i).getTime()+this.clock, 1); //1 --> Depart
         tableOfEvents.add(depart);
     }
-    public void generateArrival(){
-        int size = a.size();
+
+    private void generateArrival(){
+        int i = fGrand(a);
+        Event depart = new Event(a.get(i).getTime() + this.clock, 0); //1 --> Depart
+        tableOfEvents.add(depart);
+    }
+    private int fGrand(ArrayList<Distribution> c){
         int counter = 0;
-        double fGrande = 0.0;
         boolean found = false;
-        while (counter < size && !found){
-            fGrande += a.get(counter).probability ;
-            if(randomNumber < fGrande){
+        double bigF = 0;
+        double randomNumber = rnd.nextDouble();
+        while (counter < c.size() && !found){
+            bigF += c.get(counter).getProbability() ;
+            if(randomNumber < bigF){
                 found = true;
             }else{
                 ++counter;
             }
 
         }
-
-
-        Event depart = new Event(a.get(counter).time + this.clock, 0); //1 --> Depart
-
-        tableOfEvents.add(depart);
-
+        return  counter;
     }
 
 

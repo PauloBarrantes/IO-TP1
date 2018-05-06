@@ -3,9 +3,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Files {
+public class FilesReader {
 
-    public Files() {
+    FilesReader() {
 
     }
 
