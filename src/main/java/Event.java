@@ -1,10 +1,13 @@
+/**
+ * Event of simulation
+ */
 public class Event {
-    private int time;
-    private int type;
-    /*
-        0 -> ARRIVE
-        1 -> DEPART
-
+    private final int time;
+    private final int type;
+    /**
+       Event Constructor
+        @param time
+        @param type
      */
     public Event(int time, int type) {
         this.time = time;
@@ -16,15 +19,9 @@ public class Event {
         return time;
     }
 
-    public void setTime(int time) {
-        this.time = time;
-    }
 
     public int getType() {
         return type;
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
 }

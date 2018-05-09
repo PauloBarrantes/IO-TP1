@@ -3,15 +3,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Files Reader
+ */
 public class FilesReader {
 
-    FilesReader() {
-
-    }
-
-    public ArrayList<Distribution> readDistributions(String fileName) {
+    FilesReader() {}
+    /** Read a file that contains the data of the time
+     *  distribution between calls or the distribution
+     *  of the duration of the call
+     * @param fileName file name.
+     * @return A ArrayList
+     */
+    public ArrayList<Tuple> readDistributions(String fileName) {
         BufferedReader br = null;
-        ArrayList<Distribution> distributions = new ArrayList<Distribution>();
+        ArrayList<Tuple> distributions = new ArrayList<Tuple>();
         try {
             br = new BufferedReader(new FileReader(fileName));
             String sCurrentLine;
@@ -26,7 +32,7 @@ public class FilesReader {
                 int time = Integer.parseInt(sTime);
                 double probability = Double.parseDouble(sProbability);
 
-                distributions.add(new Distribution(time, probability));
+                distributions.add(new Tuple(time, probability));
             }
 
         } catch (IOException e) {
@@ -45,8 +51,6 @@ public class FilesReader {
             }
 
         }
-
-
         return distributions;
     }
 

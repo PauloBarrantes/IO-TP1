@@ -1,18 +1,21 @@
-/*
-
-
+/**
+ * Class that executes a simulation of a call center.
 
  */
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.Random;
-
+import java.util.*;
 
 class Simulator {
     /* Simulation variables */
+    /**
+     * Represents the number of server available
+     */
+    private static final int servers = 2;
+    /**
+     * Represents the simulation clock
+     */
     private int clock;
+
     private Comparator<Event> comparator = new Comparator<Event>() {
         public int compare(Event o1, Event o2) {
             int cmp = 0;
@@ -32,54 +35,38 @@ class Simulator {
 
         }
     };
+    /** Represents an event priority queue.*/
     private PriorityQueue<Event> tableOfEvents = new PriorityQueue<Event>(100,comparator);
-
-    //State variables
+    /** Represents the status of the servers.*/
     private int busy;
+    /** Queue length. */
     private int queueLength;
-    private static final int servers = 2;
-    //Statistical variables
+    /** Number of clients that have been served.  */
+
     private int clientsServed;
-
-
-
-    //Other variables
+    /**Variable to generate random numbers. */
     private Random rnd = new Random(System.currentTimeMillis());
-    private ArrayList<Distribution> a;
-    private ArrayList<Distribution> d;
+    /**Represents the table of time between calls*/
+    private ArrayList<Tuple> timeBetweenCalls;
+    /**Represents the table of call duration*/
+    private ArrayList<Tuple> callDuration;
 
-    private enum Distribution2{
-        A (1,0.40),
-        B (2,0.35),
-        C (3,0.25);
-
-        private final int time;
-        private final double probability;
-        Distribution2(int time, double probability){
-            this.time = time;
-            this.probability = probability;
-        }
-
-        public int getTime() {
-            return time;
-        }
-
-        public double getProbability() {
-            return probability;
-        }
-    }
-    //Constructor
-    Simulator(ArrayList<Distribution> a, ArrayList<Distribution> d) {
-        this.a = a;
-        this.d = d;
+    /**Class constructor.
+     * @param timeBetweenCalls Time Between Calls Table.
+     * @param callDuration Call Duration Table.
+     */
+    Simulator(ArrayList<Tuple> timeBetweenCalls, ArrayList<Tuple> callDuration) {
+        this.timeBetweenCalls = timeBetweenCalls;
+        this.callDuration = callDuration;
         this.clock = 0;
         this.busy = 0;
-
         this.queueLength =0;
         this.clientsServed =0;
 
     }
-
+    /** Start a simulation process.
+     * @param id The id of simulation.
+     */
     void simulate(int id){
         float timeAvg;
         Event initialArrive = new Event(0,0);
@@ -92,9 +79,9 @@ class Simulator {
             //Process that event
             assert actualEvent != null;
             if(actualEvent.getType()==0){
-                this.processArrive();
+                this.processArrival();
             }else{
-               this.processDepart();
+               this.processDeparture();
             }
              //Move the clock
 
@@ -105,11 +92,11 @@ class Simulator {
 
         timeAvg = (float)clock/clientsServed;
         System.out.printf("%-20s%-20s%-20s%-20s%-20s-\n",id,clock,queueLength,clientsServed,timeAvg);
-
-
-
     }
-    private void processArrive(){
+    /** Process an arrival
+     *
+     */
+    private void processArrival(){
         if(busy < servers){
             busy++;
             ++clientsServed;
@@ -119,7 +106,10 @@ class Simulator {
         }
         generateArrival();
     }
-    private void processDepart(){
+    /** Process a Departure
+     *
+     */
+    private void processDeparture(){
         if(queueLength > 0 ){
             -- queueLength;
             ++ clientsServed;
@@ -128,32 +118,39 @@ class Simulator {
                 --busy;
         }
     }
-
+    /** Generate a new departure
+     */
     private void generateDeparture(){
-        int i = fGrand(d);
-        Event depart = new Event(d.get(i).getTime()+this.clock, 1); //1 --> Depart
+        int i = cumulativeDistributionFunction(callDuration);
+        Event depart = new Event(callDuration.get(i).getTime()+this.clock, 1); //1 --> Depart
         tableOfEvents.add(depart);
     }
-
+    /** Generate a new arrival
+     */
     private void generateArrival(){
-        int i = fGrand(a);
-        Event depart = new Event(a.get(i).getTime() + this.clock, 0); //1 --> Depart
+        int i = cumulativeDistributionFunction(timeBetweenCalls);
+        Event depart = new Event(timeBetweenCalls.get(i).getTime() + this.clock, 0); //1 --> Depart
         tableOfEvents.add(depart);
     }
-    private int fGrand(ArrayList<Distribution> c){
+    /** CumulativeDistributionFunction
+     * @param table distribution
+     * @return an integer that represents an index of an array
+     */
+    private int cumulativeDistributionFunction(ArrayList<Tuple> table){
+
         int counter = 0;
         boolean found = false;
         double bigF = 0;
         double randomNumber = rnd.nextDouble();
-        while (counter < c.size() && !found){
-            bigF += c.get(counter).getProbability() ;
+        while (counter < table.size() && !found){
+            bigF += table.get(counter).getProbability() ;
             if(randomNumber < bigF){
                 found = true;
             }else{
                 ++counter;
             }
-
         }
+
         return  counter;
     }
 
